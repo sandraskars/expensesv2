@@ -8,9 +8,9 @@ import Categories from './visualizations/Categories';
 
 import expensesData from './data/expenses.json';
 
-var width = 750;
-var height = 1800;
-var colors = {
+const width = 750;
+const height = 1800;
+const colors = {
   white: '#fff8fa',
   gray: '#e1ecea',
   black: '#516561',
@@ -31,19 +31,12 @@ class App extends Component {
       selectedWeek: null,
     };
 
-    this.prevWeek = this.prevWeek.bind(this);
-    this.nextWeek = this.nextWeek.bind(this);
-    this.linkToCategory = this.linkToCategory.bind(this);
-    this.editDate = this.editDate.bind(this);
-    this.addCategory = this.addCategory.bind(this);
-    this.startCategory = this.startCategory.bind(this);
-    this.clearCategory = this.clearCategory.bind(this);
     this.deleteCategory = this.deleteCategory.bind(this);
   }
 
   componentWillMount() {
     // process data
-    var expenses = _.chain(expensesData)
+    const expenses = _.chain(expensesData)
       .filter(d => d.Amount < 0)
       .map((d, i) => {
         return {
@@ -56,24 +49,24 @@ class App extends Component {
       }).value();
 
     // default selected week will be the most recent week
-    var selectedWeek = d3.max(expenses, exp => d3.timeWeek.floor(exp.date));
+    const selectedWeek = d3.max(expenses, exp => d3.timeWeek.floor(exp.date));
 
     this.setState({expenses, selectedWeek});
   }
 
-  prevWeek() {
+  prevWeek = () => {
     // todo: error handling
-    var selectedWeek = d3.timeWeek.offset(this.state.selectedWeek, -1);
+    const selectedWeek = d3.timeWeek.offset(this.state.selectedWeek, -1);
     this.setState({selectedWeek});
-  }
+  };
 
-  nextWeek() {
+  nextWeek = () => {
     // todo: error handling
-    var selectedWeek = d3.timeWeek.offset(this.state.selectedWeek, 1);
+    const selectedWeek = d3.timeWeek.offset(this.state.selectedWeek, 1);
     this.setState({selectedWeek});
-  }
+  };
 
-  linkToCategory(expense, category) {
+  linkToCategory = (expense, category) => {
     if (_.includes(category.expenses, expense)) {
       category.expenses = _.without(category.expenses, expense);
       expense.categories -= 1;
@@ -82,41 +75,41 @@ class App extends Component {
       expense.categories += 1;
     }
     this.forceUpdate();
-  }
+  };
 
-  editDate(expense, day) {
+  editDate = (expense, day) => {
     expense.date = day.date;
     this.forceUpdate();
-  }
+  };
 
-  startCategory(event) {
-    var category = {
+  startCategory = (event) => {
+    const category = {
       name: event.target.value,
       expenses: [],
       total: 0,
-    }
+    };
     this.setState({categoryBeingAdded: category});
-  }
+  };
 
-  clearCategory(event) {
+  clearCategory = (event) => {
     event.target.value = '';
     event.target.blur();
     this.setState({categoryBeingAdded: null});
-  }
+  };
 
-  addCategory(event) {
-    var ENTER_CODE = 13;
-    var ESC_CODE = 27;
+  addCategory = (event) => {
+    const ENTER_CODE = 13;
+    const ESC_CODE = 27;
     if (event.keyCode === ESC_CODE) {
       this.clearCategory(event);
     } else if (event.keyCode === ENTER_CODE) {
       // take the value of the input and create new category
-      var category = Object.assign(this.state.categoryBeingAdded, {
+      const category = Object.assign(this.state.categoryBeingAdded, {
         name: event.target.value,
         fx: null,
         fy: null,
       });
-      var categories = this.state.categories;
+      const categories = this.state.categories;
       categories.push(category);
 
       // clear out the input form on successful submit
@@ -125,28 +118,28 @@ class App extends Component {
 
       this.setState({categories, categoryBeingAdded: null});
     }
-  }
+  };
 
-  deleteCategory(category) {
-    var categories = _.filter(this.state.categories, d => d.name !== category.name);
+  deleteCategory = (category) => {
+    const categories = _.filter(this.state.categories, d => d.name !== category.name);
     this.setState({categories});
-  }
+  };
 
   render() {
-    var selectedWeek = d3.timeFormat('%B %d, %Y')(this.state.selectedWeek);
-    var style = {
+    const selectedWeek = d3.timeFormat('%B %d, %Y')(this.state.selectedWeek);
+    const style = {
       width,
       margin: 'auto',
-    }
-    var svgStyle = {
+    };
+    const svgStyle = {
       overflow: 'visible',
       position: 'absolute',
       top: 0,
       width,
       height,
       zIndex: -1,
-    }
-    var inputStyle = {
+    };
+    const inputStyle = {
       fontSize: 14,
       textAlign: 'center',
       display: 'block',
@@ -157,8 +150,8 @@ class App extends Component {
       color: colors.black,
       border: 'none',
       borderBottom: '2px solid ' + colors.black,
-    }
-    var props = {
+    };
+    const props = {
       width,
       colors,
       linkToCategory: this.linkToCategory,
@@ -174,7 +167,7 @@ class App extends Component {
           <span style={{cursor: 'pointer'}}  onClick={this.nextWeek}> →</span>
         </h1>
         <input id='addCategory' style={inputStyle} type='text' placeholder='Add Category'
-          onFocus={this.startCategory} onBlur={this.clearCategory} onKeyDown={this.addCategory}></input>
+               onFocus={this.startCategory} onBlur={this.clearCategory} onKeyDown={this.addCategory}/>
         <svg style={svgStyle}>
           <Day {...props} {...this.state} />
           <Categories {...props} {...this.state} />

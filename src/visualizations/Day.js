@@ -4,26 +4,19 @@ import _ from 'lodash';
 
 import chroma from 'chroma-js';
 
-var height = 650;
-var dayWidth = 55;
-var dayHeight = 75;
-var topPadding = 150;
-var margin = {left: 40, top: 20, right: 40, bottom: 20};
+const height = 650;
+let dayWidth = 55;
+let dayHeight = 75;
+const topPadding = 150;
+const margin = { left: 40, top: 20, right: 40, bottom: 20 };
 
 // d3 functions
-var xScale = d3.scaleLinear().domain([0, 6]);
-var yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
-var amountScale = d3.scaleLog();
-var colorScale = chroma.scale(['#53c3ac', '#f7e883', '#e85178']);
+const xScale = d3.scaleLinear().domain([0, 6]);
+const yScale = d3.scaleLinear().range([height - margin.bottom, margin.top]);
+const amountScale = d3.scaleLog();
+const colorScale = chroma.scale(['#53c3ac', '#f7e883', '#e85178']);
 
 class Day extends Component {
-
-  constructor(props) {
-    super(props);
-
-    this.state = {};
-  }
-
   componentWillMount() {
     xScale.range([margin.left, this.props.width - margin.right]);
   }
@@ -41,7 +34,7 @@ class Day extends Component {
   }
 
   calculateData() {
-    var weeksExtent = d3.extent(this.props.expenses,
+    const weeksExtent = d3.extent(this.props.expenses,
       d => d3.timeWeek.floor(d.date));
     yScale.domain(weeksExtent);
 
@@ -52,12 +45,12 @@ class Day extends Component {
         return obj;
       }, {}).value();
     // get min+max total amounts per day
-    var totalsExtent = d3.extent(_.values(this.totalsByDay));
+    const totalsExtent = d3.extent(_.values(this.totalsByDay));
     amountScale.domain(totalsExtent);
 
     this.days = _.map(this.totalsByDay, (total, date) => {
       date = new Date(date);
-      var {x, y} = this.calculateDayPosition(date, true);
+      const {x, y} = this.calculateDayPosition(date, true);
 
       return {
         date,
@@ -67,10 +60,10 @@ class Day extends Component {
     });
 
     // get min+max dates
-    var [minDate, maxDate] = d3.extent(this.props.expenses,
+    const [minDate, maxDate] = d3.extent(this.props.expenses,
       d => d3.timeDay.floor(d.date));
     // backs should be all dates in range as well as an extra for selectedWeek
-    var selectedWeek = d3.timeDay.range(this.props.selectedWeek,
+    const selectedWeek = d3.timeDay.range(this.props.selectedWeek,
       d3.timeWeek.offset(this.props.selectedWeek, 1));
     this.backs = _.chain(selectedWeek)
       .map(date => this.calculateDayPosition(date, true))
@@ -80,14 +73,14 @@ class Day extends Component {
   }
 
   calculateDayPosition(date, shouldSelectedWeekCurve) {
-    var dayOfWeek = date.getDay();
-    var week = d3.timeWeek.floor(date);
-    var x = xScale(dayOfWeek);
-    var y = yScale(week) + height + 2 * dayHeight;
+    const dayOfWeek = date.getDay();
+    const week = d3.timeWeek.floor(date);
+    const x = xScale(dayOfWeek);
+    let y = yScale(week) + height + 2 * dayHeight;
 
     if (shouldSelectedWeekCurve &&
       week.getTime() === this.props.selectedWeek.getTime()) {
-      var offset = Math.abs(3 - dayOfWeek);
+      const offset = Math.abs(3 - dayOfWeek);
       y = height - 2 * dayHeight - 0.5 * offset * dayHeight;
     }
     y += topPadding;
@@ -109,17 +102,17 @@ class Day extends Component {
   }
 
   renderDays() {
-    var t = d3.transition().duration(500);
-    var fontSize = 20;
+    const t = d3.transition().duration(500);
+    const fontSize = 20;
 
-    var days = this.container.selectAll('.day')
+    let days = this.container.selectAll('.day')
       .data(this.days, d => d.date);
 
     // exit
     days.exit().remove();
 
     // enter
-    var enter = days.enter().append('g')
+    const enter = days.enter().append('g')
       .classed('day', true)
       .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
     enter.append('rect')
@@ -133,7 +126,7 @@ class Day extends Component {
 
     days = enter.merge(days);
     days.transition(t)
-      .delay((d, i) => d.date.getDay() * 50)
+      .delay(d => d.date.getDay() * 50)
       .attr('transform', d => 'translate(' + [d.x, d.y] + ')');
 
     days.select('rect')
@@ -144,9 +137,9 @@ class Day extends Component {
       .transition(t)
       .attr('fill', d => d.fill);
 
-    var timeFormat = d3.timeFormat('%m/%d');
+    const timeFormat = d3.timeFormat('%m/%d');
     days.select('text')
-      .attr('y', d => dayHeight - 0.75 * fontSize)
+      .attr('y', () => dayHeight - 0.75 * fontSize)
       .text(d => timeFormat(d.date));
   }
 

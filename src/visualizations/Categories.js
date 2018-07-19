@@ -4,23 +4,22 @@ import _ from 'lodash';
 import chroma from 'chroma-js';
 import deleteIconSrc from '../images/delete.svg';
 
-var height = 600;
-var topPadding = 150;
-var radius = 55;
-var white = '#fff8fa';
-var deleteIconY = 160;
-var deleteIconRadius = 24;
+const height = 600;
+const topPadding = 150;
+const radius = 55;
+const deleteIconY = 160;
+const deleteIconRadius = 24;
 
-var amountScale = d3.scaleLog();
-var colorScale = chroma.scale(['#53c3ac', '#f7e883', '#e85178']);
-var simulation = d3.forceSimulation()
+const amountScale = d3.scaleLog();
+const colorScale = chroma.scale(['#53c3ac', '#f7e883', '#e85178']);
+const simulation = d3.forceSimulation()
   .alphaDecay(0.001)
   .velocityDecay(0.3)
   .force('collide', d3.forceCollide(d => d.radius + 10))
   .force('x', d3.forceX(d => d.focusX))
   .force('y', d3.forceY(d => d.focusY))
   .stop();
-var drag = d3.drag();
+const drag = d3.drag();
 
 class App extends Component {
 
@@ -67,19 +66,19 @@ class App extends Component {
   }
 
   calculateData() {
-    var totalsByDay = _.chain(this.props.expenses)
+    const totalsByDay = _.chain(this.props.expenses)
       .groupBy(d => d3.timeDay.floor(d.date))
       .map(expenses => _.sumBy(expenses, 'amount'))
       .value();
     // get min+max total amounts per day
-    var totalsExtent = d3.extent(_.values(totalsByDay));
+    const totalsExtent = d3.extent(_.values(totalsByDay));
     amountScale.domain(totalsExtent);
 
-    var width = this.props.width;
+    const width = this.props.width;
     this.links = [];
     // calculate existing categories
     this.categories = _.map(this.props.categories, category => {
-      var total = 0;
+      let total = 0;
       _.chain(category.expenses)
         .filter(expense => d3.timeWeek.floor(expense.date).getTime() ===
           this.props.selectedWeek.getTime())
@@ -128,7 +127,7 @@ class App extends Component {
   }
 
   renderCircles() {
-    var t = d3.transition().duration(500);
+    const t = d3.transition().duration(500);
     // update
     this.circles = this.container.selectAll('g')
       .data(this.categories);
@@ -137,7 +136,7 @@ class App extends Component {
     this.circles.exit().remove();
 
     // enter
-    var enter = this.circles.enter().append('g');
+    const enter = this.circles.enter().append('g');
     enter.append('circle')
       .attr('r', radius)
       .attr('stroke-width', 1)
@@ -165,14 +164,14 @@ class App extends Component {
     this.circles.attr('transform', d => 'translate(' + [d.x, d.y] + ')');
     this.lines
       .attr('transform', d => {
-        var angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x);
+        let angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x);
         angle *= (180 / Math.PI);
         return'translate(' + [d.source.x, d.source.y] + ')rotate(' + angle + ')';
       }).attr('d', d => {
-        var direction = d.source.date.getDay() < 3 ? -1 : 1;
-        // calculate distance between source and target
-        var dist = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
-        return 'M0,0 Q' + [dist / 2, direction * dist / 3] + ' ' + [dist, 0];
+      const direction = d.source.date.getDay() < 3 ? -1 : 1;
+      // calculate distance between source and target
+      const dist = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
+      return 'M0,0 Q' + [dist / 2, direction * dist / 3] + ' ' + [dist, 0];
       });
   }
 
@@ -197,8 +196,8 @@ class App extends Component {
     this.deleteIcon.style('display', 'none');
 
     // if dragged over the deleteIcon
-    var categoryX = d3.event.x;
-    var categoryY = d3.event.y;
+    const categoryX = d3.event.x;
+    const categoryY = d3.event.y;
     if (this.props.width / 2 - deleteIconRadius < categoryX &&
       categoryX < this.props.width / 2 + deleteIconRadius &&
       deleteIconY - deleteIconRadius < categoryY &&
